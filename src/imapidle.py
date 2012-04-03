@@ -1,16 +1,18 @@
 import imaplib
 
-def idle(connection, cb):
-    #socket = connection.socket()
+
+def idle(connection):
     tag = connection._new_tag()
     connection.send("%s IDLE\r\n" % tag)
     response = connection.readline()
     connection.loop = True
     if response == '+ idling\r\n':
         while connection.loop:
-            cb(connection, connection.readline())
+            yield connection.readline()
     else:
         raise Exception("IDLE not handled? : %s" % response)
+
+imaplib.IMAP4.idle = idle
 
 if __name__ == '__main__':
     import os
@@ -20,6 +22,5 @@ if __name__ == '__main__':
     m = imaplib.IMAP4_SSL(os.environ['SERVER'])
     m.login(user, password)
     m.select()
-    def _callback(connection, r):
-        print r
-    idle(m, _callback)
+    for msg in m.idle():
+        print msg
