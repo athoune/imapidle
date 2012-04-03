@@ -20,7 +20,7 @@ from imapidle import imaplib
 m = imaplib.IMAP4_SSL('imap.gmail.com')
 m.login('robert', 'pa55w0rd')
 m.select()
-for msg in m.idle():
+for uid, msg in m.idle():
     print msg
 ```
 

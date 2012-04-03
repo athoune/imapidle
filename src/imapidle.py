@@ -8,11 +8,19 @@ def idle(connection):
     connection.loop = True
     if response == '+ idling\r\n':
         while connection.loop:
-            yield connection.readline()
+            resp = connection.readline()
+            uid, message = resp[2:-2].split(' ')
+            yield uid, message
     else:
         raise Exception("IDLE not handled? : %s" % response)
 
+
+def done(connection):
+    connection.send("DONE\r\n")
+    connection.loop = False
+
 imaplib.IMAP4.idle = idle
+imaplib.IMAP4.done = done
 
 if __name__ == '__main__':
     import os
@@ -22,5 +30,12 @@ if __name__ == '__main__':
     m = imaplib.IMAP4_SSL(os.environ['SERVER'])
     m.login(user, password)
     m.select()
-    for msg in m.idle():
-        print msg
+    loop = True
+    while loop:
+        for uid, msg in m.idle():
+            print uid, msg
+            if msg == "EXISTS":
+                m.done()
+                typ, data = m.fetch(uid, '(RFC822)')
+                print typ
+                print data
