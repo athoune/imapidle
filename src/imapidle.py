@@ -24,6 +24,7 @@ imaplib.IMAP4.done = done
 
 if __name__ == '__main__':
     import os
+    import email
     user = os.environ['EMAIL']
     password = os.environ['PASSWORD']
     print os.environ['SERVER']
@@ -36,6 +37,9 @@ if __name__ == '__main__':
             print uid, msg
             if msg == "EXISTS":
                 m.done()
-                typ, data = m.fetch(uid, '(RFC822)')
-                print typ
-                print data
+                status, datas = m.fetch(uid, '(RFC822)')
+                for raw_mail in datas:
+                    mail = email.message_from_string(raw_mail[1])
+                    for field, value in mail.items():
+                        print field
+                        print "\t", value
