@@ -24,22 +24,21 @@ imaplib.IMAP4.done = done
 
 if __name__ == '__main__':
     import os
-    import email
+    from lamson.mail import MailRequest
     user = os.environ['EMAIL']
     password = os.environ['PASSWORD']
     print os.environ['SERVER']
-    m = imaplib.IMAP4_SSL(os.environ['SERVER'])
-    m.login(user, password)
-    m.select()
+    conn = imaplib.IMAP4_SSL(os.environ['SERVER'])
+    conn.login(user, password)
+    conn.select()
     loop = True
     while loop:
-        for uid, msg in m.idle():
+        for uid, msg in conn.idle():
             print uid, msg
             if msg == "EXISTS":
-                m.done()
-                status, datas = m.fetch(uid, '(RFC822)')
-                for raw_mail in datas:
-                    mail = email.message_from_string(raw_mail[1])
-                    for field, value in mail.items():
-                        print field
-                        print "\t", value
+                conn.done()
+                status, datas = conn.fetch(uid, '(RFC822)')
+                m = MailRequest('localhost', None, None, datas[0][1])
+                print m.keys()
+                print m.all_parts()
+                print m.is_bounce()
