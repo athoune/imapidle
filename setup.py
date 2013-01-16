@@ -1,3 +1,6 @@
+# Copyright (c) 2012 Mathieu Lecarme
+# This code is licensed under the MIT license (see LICENSE for details)
+
 from setuptools import setup
 
 setup(name='imapidle',
